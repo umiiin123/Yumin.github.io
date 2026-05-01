@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Computing Seminar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04070f;--bg2:#080e1c;--bg3:#0c1628;
+  --sf:rgba(255,255,255,.042);--sf2:rgba(255,255,255,.08);
+  --br:rgba(100,180,255,.13);--br2:rgba(100,180,255,.28);--br3:rgba(100,180,255,.5);
+  --ac:#38bdf8;--ac2:#818cf8;--ac3:#34d399;--ac4:#fb923c;
+  --danger:#f87171;
+  --tx:#e2e8f0;--tx2:#94a3b8;--tx3:#475569;--tx4:#2d3a4e;
+  --glow:0 0 40px rgba(56,189,248,.12);
+  --r:3px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden;}
+/* grid bg */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,.022) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+#cvs{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.4;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1rem 3.5rem;background:rgba(4,7,15,.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--br);}
+.nav-logo{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--ac);letter-spacing:.2em;text-transform:uppercase;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{color:var(--tx2);text-decoration:none;font-size:.84rem;font-weight:500;transition:color .18s;cursor:pointer;}
+.nav-links a:hover{color:var(--ac);}
+.admin-btn{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.12em;color:var(--tx3);text-decoration:none;border:1px solid rgba(100,180,255,.12);padding:.3rem .85rem;transition:all .2s;cursor:pointer;background:none;}
+.admin-btn:hover{color:var(--ac2);border-color:var(--ac2);}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:1;}
+.wrap{max-width:1100px;margin:0 auto;padding:0 2rem;}
+.sec-tag{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.25em;text-transform:uppercase;color:var(--ac);margin-bottom:.55rem;display:flex;align-items:center;gap:.45rem;}
+.sec-tag::before{content:'//';opacity:.4;}
+.sec-title{font-family:'Syne',sans-serif;font-size:clamp(1.7rem,3.2vw,2.6rem);font-weight:700;letter-spacing:-.02em;}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;}
+.hero-eyebrow{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.32em;text-transform:uppercase;color:var(--ac);margin-bottom:1.4rem;display:flex;align-items:center;gap:.8rem;}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';display:inline-block;width:26px;height:1px;background:var(--ac);opacity:.45;}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(3rem,9vw,7.5rem);font-weight:800;line-height:.92;letter-spacing:-.025em;margin-bottom:1.4rem;}
+.h1-plain{display:block;color:var(--tx);}
+.h1-grad{display:block;background:linear-gradient(130deg,var(--ac) 20%,var(--ac2) 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:1rem;color:var(--tx2);max-width:540px;margin:0 auto 1.6rem;line-height:1.78;}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:2.4rem;}
+.chip{font-family:'Space Mono',monospace;font-size:.64rem;letter-spacing:.07em;color:var(--ac2);border:1px solid rgba(129,140,248,.22);background:rgba(129,140,248,.07);padding:.28rem .75rem;}
+.hero-stats{display:flex;gap:3rem;margin-bottom:2.8rem;}
+.stat-num{font-family:'Space Mono',monospace;font-size:2rem;font-weight:700;color:var(--ac);display:block;}
+.stat-lbl{font-size:.7rem;color:var(--tx3);letter-spacing:.12em;text-transform:uppercase;}
+.hero-cta{display:flex;gap:.85rem;flex-wrap:wrap;justify-content:center;}
+.scan-line{position:absolute;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--ac),transparent);animation:scan 5s linear infinite;opacity:.18;top:0;}
+@keyframes scan{0%{top:0}100%{top:100%}}
+
+/* ── BUTTONS ── */
+.btn{cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;border:none;display:inline-flex;align-items:center;gap:.4rem;}
+.btn-ac{background:var(--ac);color:#04070f;font-weight:600;padding:.78rem 1.8rem;font-size:.88rem;letter-spacing:.03em;clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,0 100%);}
+.btn-ac:hover{background:#7dd3fc;transform:translateY(-1px);}
+.btn-ol{background:transparent;color:var(--tx2);border:1px solid var(--br2);padding:.78rem 1.8rem;font-size:.88rem;clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,0 100%);}
+.btn-ol:hover{border-color:var(--ac);color:var(--ac);}
+.btn-sm{padding:.38rem .85rem;font-size:.78rem;font-weight:500;}
+.btn-ghost{background:transparent;border:1px solid var(--br2);color:var(--tx2);}
+.btn-ghost:hover{border-color:var(--ac);color:var(--ac);}
+.btn-del{background:transparent;border:1px solid rgba(248,113,113,.25);color:var(--danger);padding:.32rem .7rem;font-size:.74rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;}
+.btn-del:hover{background:rgba(248,113,113,.09);}
+.btn-edit{background:transparent;border:1px solid var(--br);color:var(--tx3);padding:.32rem .7rem;font-size:.74rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;}
+.btn-edit:hover{border-color:var(--ac);color:var(--ac);}
+
+/* ── INFO ── */
+.info-sec{padding:5.5rem 0;border-top:1px solid var(--br);}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.info-card{background:var(--sf);border:1px solid var(--br);padding:1.75rem;position:relative;overflow:hidden;transition:border-color .25s,box-shadow .25s;}
+.info-card:hover{border-color:var(--br2);box-shadow:var(--glow);}
+.info-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--ac),var(--ac2));}
+.info-lbl{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--tx3);margin-bottom:.5rem;}
+.info-val{font-family:'Syne',sans-serif;font-size:.98rem;font-weight:600;color:var(--tx);margin-bottom:.2rem;}
+.info-sub{font-size:.82rem;color:var(--tx2);word-break:break-all;}
+
+/* ── MEMBERS ── */
+.mem-sec{padding:5.5rem 0;border-top:1px solid var(--br);}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.2rem;gap:1rem;flex-wrap:wrap;}
+.mem-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:1rem;}
+.mem-card{background:var(--sf);border:1px solid var(--br);padding:1.35rem;text-align:center;transition:all .22s;position:relative;}
+.mem-card:hover{border-color:var(--ac);transform:translateY(-3px);box-shadow:0 8px 28px rgba(56,189,248,.08);}
+.avi{width:52px;height:52px;border-radius:50%;margin:0 auto .8rem;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.95rem;font-weight:700;border:2px solid var(--br2);}
+.avi-org{background:rgba(129,140,248,.13);color:var(--ac2);border-color:rgba(129,140,248,.32);}
+.avi-pre{background:rgba(56,189,248,.12);color:var(--ac);border-color:rgba(56,189,248,.3);}
+.avi-mem{background:rgba(52,211,153,.09);color:var(--ac3);border-color:rgba(52,211,153,.25);}
+.mem-name{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:600;color:var(--tx);margin-bottom:.18rem;}
+.mem-affil{font-size:.74rem;color:var(--tx3);margin-bottom:.45rem;}
+.role-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:.16rem .5rem;border-radius:2px;}
+.rb-org{background:rgba(129,140,248,.13);color:var(--ac2);}
+.rb-pre{background:rgba(56,189,248,.12);color:var(--ac);}
+.rb-mem{background:rgba(52,211,153,.09);color:var(--ac3);}
+.mem-actions{position:absolute;top:.5rem;right:.5rem;display:none;gap:.25rem;}
+.mem-card:hover .mem-actions{display:flex;}
+
+/* ── SCHEDULE ── */
+.sched-sec{padding:5.5rem 0;border-top:1px solid var(--br);}
+.timeline{position:relative;padding-left:2rem;}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:linear-gradient(180deg,var(--ac),var(--ac2),transparent);}
+.sched-item{position:relative;padding:1.35rem 1.35rem 1.35rem 2rem;background:var(--sf);border:1px solid var(--br);margin-bottom:.9rem;transition:all .22s;}
+.sched-item:hover{border-color:var(--br2);box-shadow:var(--glow);}
+.sched-item::before{content:'';position:absolute;left:-2.45rem;top:1.65rem;width:7px;height:7px;border-radius:50%;background:var(--ac);box-shadow:0 0 10px var(--ac);}
+.sched-week{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.15em;color:var(--ac);text-transform:uppercase;margin-bottom:.22rem;}
+.sched-title{font-family:'Syne',sans-serif;font-size:.96rem;font-weight:600;color:var(--tx);margin-bottom:.3rem;}
+.sched-meta{font-size:.78rem;color:var(--tx3);display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.sched-desc{font-size:.8rem;color:var(--tx2);line-height:1.6;}
+.presenters-list{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem;}
+.presenter-tag{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.05em;padding:.18rem .55rem;background:rgba(56,189,248,.09);color:var(--ac);border:1px solid rgba(56,189,248,.18);}
+.sched-actions{position:absolute;top:.7rem;right:.7rem;display:none;gap:.3rem;}
+.sched-item:hover .sched-actions{display:flex;}
+
+/* ── MATERIALS ── */
+.mat-sec{padding:5.5rem 0;border-top:1px solid var(--br);}
+.week-filter{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.6rem;}
+.wbtn{background:var(--sf);border:1px solid var(--br);color:var(--tx3);padding:.32rem .8rem;font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.05em;cursor:pointer;transition:all .18s;}
+.wbtn:hover,.wbtn.on{border-color:var(--ac);color:var(--ac);background:rgba(56,189,248,.07);}
+.mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:1rem;}
+.mat-card{background:var(--sf);border:1px solid var(--br);padding:1.35rem;display:flex;flex-direction:column;gap:.65rem;transition:all .22s;position:relative;}
+.mat-card:hover{border-color:var(--br2);transform:translateY(-2px);box-shadow:var(--glow);}
+.mat-top{display:flex;align-items:flex-start;gap:.75rem;}
+.mat-type-box{flex-shrink:0;width:38px;height:38px;border:1px solid var(--br2);display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:.62rem;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;}
+.mat-title{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:600;color:var(--tx);flex:1;line-height:1.4;}
+.mat-meta{font-size:.74rem;color:var(--tx3);font-family:'Space Mono',monospace;}
+.mat-week-tag{display:inline-block;background:rgba(56,189,248,.08);color:var(--ac);font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.1em;padding:.16rem .52rem;text-transform:uppercase;}
+.mat-presenters{font-size:.76rem;color:var(--tx2);}
+.mat-dl{background:transparent;border:1px solid var(--br2);color:var(--tx2);padding:.36rem .9rem;font-size:.74rem;cursor:pointer;font-family:'Space Mono',monospace;letter-spacing:.04em;transition:all .18s;width:100%;text-align:center;}
+.mat-dl:hover{background:rgba(56,189,248,.07);border-color:var(--ac);color:var(--ac);}
+.mat-actions{position:absolute;top:.5rem;right:.5rem;display:none;gap:.25rem;}
+.mat-card:hover .mat-actions{display:flex;}
+.file-preview{max-width:100%;margin-top:.3rem;border:1px solid var(--br);border-radius:var(--r);}
+
+/* ── DROP ZONE ── */
+.drop-zone{border:1px dashed var(--br2);padding:2.2rem;text-align:center;cursor:pointer;transition:all .22s;margin-bottom:1.6rem;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--ac);background:rgba(56,189,248,.03);}
+.dz-icon{width:36px;height:36px;margin:0 auto .7rem;border:1px solid var(--br2);display:flex;align-items:center;justify-content:center;}
+.dz-icon svg{width:18px;height:18px;stroke:var(--tx3);}
+.dz-text{font-size:.88rem;color:var(--tx2);margin-bottom:.25rem;}
+.dz-hint{font-size:.74rem;color:var(--tx3);font-family:'Space Mono',monospace;}
+.dz-input{display:none;}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(4,7,15,.88);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--br2);width:100%;max-width:580px;max-height:88vh;overflow-y:auto;position:relative;}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--ac),var(--ac2));}
+.modal-head{padding:1.5rem 1.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br);}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--tx);}
+.modal-close{background:none;border:none;color:var(--tx3);font-size:1.2rem;cursor:pointer;transition:color .15s;line-height:1;}
+.modal-close:hover{color:var(--danger);}
+.modal-body{padding:1.5rem 1.75rem;}
+
+/* ── ADMIN PANEL ── */
+.admin-bg{position:fixed;inset:0;background:rgba(4,7,15,.95);z-index:600;display:none;flex-direction:column;backdrop-filter:blur(8px);}
+.admin-bg.open{display:flex;}
+.admin-shell{display:flex;flex:1;overflow:hidden;}
+.admin-sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--br);padding:1.5rem 0;display:flex;flex-direction:column;}
+.adm-logo{padding:.5rem 1.4rem 1.2rem;border-bottom:1px solid var(--br);margin-bottom:.75rem;}
+.adm-logo-main{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--tx);}
+.adm-logo-sub{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ac);margin-top:.1rem;}
+.adm-nav{flex:1;padding:0 .6rem;}
+.adm-nav a{display:flex;align-items:center;gap:.65rem;padding:.58rem .75rem;color:var(--tx2);text-decoration:none;font-size:.83rem;font-weight:500;border-radius:2px;transition:all .16s;cursor:pointer;margin-bottom:.15rem;}
+.adm-nav a:hover,.adm-nav a.on{color:var(--ac);background:rgba(56,189,248,.07);}
+.adm-nav-icon{font-family:'Space Mono',monospace;font-size:.65rem;width:20px;text-align:center;opacity:.55;}
+.adm-nav a.on .adm-nav-icon{opacity:1;}
+.adm-footer{padding:1rem 1.4rem 0;border-top:1px solid var(--br);margin-top:auto;}
+.adm-exit{width:100%;background:transparent;border:1px solid var(--br);color:var(--tx3);padding:.48rem;font-size:.76rem;font-family:'Space Mono',monospace;cursor:pointer;transition:all .18s;letter-spacing:.05em;}
+.adm-exit:hover{border-color:var(--danger);color:var(--danger);}
+.adm-main{flex:1;overflow-y:auto;padding:2rem 2.5rem;}
+.adm-page{display:none;}
+.adm-page.on{display:block;}
+.adm-page-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.8rem;padding-bottom:1.1rem;border-bottom:1px solid var(--br);}
+.adm-page-title{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:700;color:var(--tx);}
+.adm-card{background:var(--sf);border:1px solid var(--br);padding:1.5rem;margin-bottom:1.25rem;}
+.adm-card h3{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:600;color:var(--tx);margin-bottom:1.1rem;padding-bottom:.65rem;border-bottom:1px solid var(--br);}
+.adm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+.adm-stat{background:var(--sf);border:1px solid var(--br);padding:1.1rem 1.3rem;}
+.adm-stat-n{font-family:'Space Mono',monospace;font-size:1.75rem;font-weight:700;color:var(--ac);display:block;}
+.adm-stat-l{font-size:.7rem;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase;font-family:'Space Mono',monospace;}
+
+/* ── FORMS ── */
+.fg{display:flex;flex-direction:column;gap:.32rem;margin-bottom:.9rem;}
+.fg label{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);}
+.fg input,.fg select,.fg textarea{background:var(--bg);border:1px solid var(--br);color:var(--tx);padding:.6rem .82rem;font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none;transition:border-color .18s;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--ac);}
+.fg select option{background:var(--bg2);}
+.fg textarea{resize:vertical;min-height:72px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.85rem;}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:.83rem;}
+.tbl th{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tx3);padding:.55rem .8rem;text-align:left;border-bottom:1px solid var(--br);font-weight:400;}
+.tbl td{padding:.7rem .8rem;border-bottom:1px solid var(--br);color:var(--tx2);vertical-align:middle;}
+.tbl tr:hover td{background:rgba(255,255,255,.018);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl-actions{display:flex;gap:.35rem;}
+
+/* chips */
+.chips-edit{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.7rem;}
+.chip-e{display:flex;align-items:center;gap:.45rem;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.22);color:var(--ac2);font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.05em;padding:.22rem .58rem;}
+.chip-x{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:.85rem;line-height:1;padding:0;transition:color .14s;}
+.chip-x:hover{color:var(--danger);}
+
+/* multi-presenter */
+.presenter-inputs{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.55rem;}
+.pi-row{display:flex;gap:.45rem;align-items:center;}
+.pi-row input{flex:1;background:var(--bg);border:1px solid var(--br);color:var(--tx);padding:.52rem .75rem;font-family:'DM Sans',sans-serif;font-size:.84rem;outline:none;transition:border-color .18s;}
+.pi-row input:focus{border-color:var(--ac);}
+.pi-rm{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:1rem;line-height:1;transition:color .14s;}
+.pi-rm:hover{color:var(--danger);}
+
+/* edit inline */
+.inline-edit{background:var(--bg);border:1px solid var(--ac);color:var(--tx);padding:.3rem .55rem;font-size:inherit;font-family:inherit;outline:none;width:100%;}
+
+/* toast */
+.toast{position:fixed;bottom:1.8rem;right:1.8rem;background:var(--bg3);border:1px solid var(--ac);color:var(--ac);padding:.65rem 1.1rem;font-family:'Space Mono',monospace;font-size:.76rem;z-index:999;display:none;animation:si .22s ease;}
+.toast.on{display:block;}
+@keyframes si{from{transform:translateY(.6rem);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* login */
+.login-box{background:var(--bg2);border:1px solid var(--br2);padding:2.5rem 3rem;width:100%;max-width:400px;position:relative;overflow:hidden;}
+.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--ac),var(--ac2));}
+.login-logo{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--tx);margin-bottom:.15rem;}
+.login-sub{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ac);margin-bottom:1.75rem;}
+.login-err{font-size:.78rem;color:var(--danger);margin-top:.6rem;font-family:'Space Mono',monospace;display:none;text-align:center;}
+.login-hint{font-size:.7rem;color:var(--tx3);text-align:center;font-family:'Space Mono',monospace;margin-top:.5rem;}
+
+/* empty */
+.empty{text-align:center;padding:2.5rem;color:var(--tx3);font-size:.82rem;border:1px dashed var(--br);font-family:'Space Mono',monospace;}
+
+/* FILE SIZE BAR */
+.file-bar{font-size:.7rem;color:var(--tx3);font-family:'Space Mono',monospace;margin-top:.2rem;}
+
+/* footer */
+footer{border-top:1px solid var(--br);padding:2.5rem 0 1.8rem;text-align:center;color:var(--tx3);font-size:.76rem;font-family:'Space Mono',monospace;letter-spacing:.05em;position:relative;z-index:1;}
+.ft-logo{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--tx2);margin-bottom:.35rem;}
+
+@media(max-width:768px){
+  nav{padding:.9rem 1.25rem;}
+  .nav-links{display:none;}
+  .hero h1{font-size:3rem;}
+  .hero-stats{gap:1.5rem;}
+  .info-grid,.fr,.fr3{grid-template-columns:1fr;}
+  .admin-sidebar{display:none;}
+  .adm-main{padding:1.25rem;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="cvs"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">&#10216;&#936;&#124; QCS &#124;&#936;&#10217;</div>
+  <ul class="nav-links">
+    <li><a onclick="scrollTo('#hero')">About</a></li>
+    <li><a onclick="scrollTo('#members')">Members</a></li>
+    <li><a onclick="scrollTo('#schedule')">Schedule</a></li>
+    <li><a onclick="scrollTo('#materials')">Materials</a></li>
+  </ul>
+  <button class="admin-btn" onclick="openAdminLogin()">Admin</button>
+</nav>
+
+<!-- ========== PUBLIC PAGES ========== -->
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="scan-line"></div>
+  <div class="hero-eyebrow">Graduate Seminar &middot; <span id="p-year">2025&ndash;2026</span></div>
+  <h1>
+    <span class="h1-plain">Quantum</span>
+    <span class="h1-grad">Computing</span>
+    <span class="h1-plain" style="font-size:.55em;letter-spacing:.14em;opacity:.6;">Seminar</span>
+  </h1>
+  <p class="hero-sub" id="p-desc">A graduate research seminar exploring the theoretical and applied frontiers of quantum information science — from quantum algorithms and cryptography to quantum machine learning and error correction.</p>
+  <div class="chips" id="p-chips"></div>
+  <div class="hero-stats">
+    <div><span class="stat-num" id="s-members">0</span><span class="stat-lbl">Members</span></div>
+    <div><span class="stat-num" id="s-sessions">0</span><span class="stat-lbl">Sessions</span></div>
+    <div><span class="stat-num" id="s-materials">0</span><span class="stat-lbl">Materials</span></div>
+  </div>
+  <div class="hero-cta">
+    <button class="btn btn-ac" onclick="scrollTo('#members')">View Members</button>
+    <button class="btn btn-ol" onclick="scrollTo('#materials')">Browse Materials</button>
+  </div>
+</section>
+
+<!-- INFO -->
+<section class="info-sec" id="info">
+  <div class="wrap">
+    <div class="info-grid">
+      <div class="info-card"><div class="info-lbl">Location</div><div class="info-val" id="p-loc">세미나실 403호</div><div class="info-sub">Engineering Building 4F</div></div>
+      <div class="info-card"><div class="info-lbl">Regular Meeting</div><div class="info-val" id="p-time">매주 목요일 15:00&ndash;17:00</div><div class="info-sub">Every Thursday</div></div>
+      <div class="info-card"><div class="info-lbl">Online Access</div><div class="info-val" id="p-link-label">온라인 링크 미설정</div><div class="info-sub" id="p-link-url" style="color:var(--ac3);cursor:pointer;"></div></div>
+      <div class="info-card"><div class="info-lbl">Research Focus</div><div class="info-val" id="p-focus">QA &middot; QML &middot; QKD &middot; QEC</div><div class="info-sub" id="p-focus-sub">Algorithms &middot; ML &middot; Cryptography &middot; Error Correction</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERS -->
+<section class="mem-sec" id="members">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="sec-tag">Participants</div><h2 class="sec-title">Seminar Members</h2></div>
+    </div>
+    <div class="mem-grid" id="p-mem-grid"></div>
+  </div>
+</section>
+
+<!-- SCHEDULE -->
+<section class="sched-sec" id="schedule">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="sec-tag">Timeline</div><h2 class="sec-title">Session Schedule</h2></div>
+    </div>
+    <div class="timeline" id="p-timeline"></div>
+  </div>
+</section>
+
+<!-- MATERIALS -->
+<section class="mat-sec" id="materials">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><div class="sec-tag">Resources</div><h2 class="sec-title">Seminar Materials</h2></div>
+    </div>
+    <div class="week-filter" id="p-wfilter"><button class="wbtn on" onclick="filterMat('all',this)">All</button></div>
+    <div class="mat-grid" id="p-mat-grid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="ft-logo">&#10216;&#936;&#124; QCS &#124;&#936;&#10217;</div>
+    <p>Quantum Computing Seminar &middot; Graduate Program</p>
+    <p style="margin-top:.2rem;opacity:.38;">Read-only &mdash; contact organizer to make changes</p>
+  </div>
+</footer>
+
+<!-- ========== LOGIN MODAL ========== -->
+<div class="modal-bg" id="login-modal">
+  <div class="login-box">
+    <div class="login-logo">Admin Access</div>
+    <div class="login-sub">Quantum Computing Seminar</div>
+    <div class="fg"><label>Password</label><input type="password" id="pw-in" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-ac" style="width:100%;justify-content:center;" onclick="doLogin()">Enter Panel</button>
+    <p class="login-err" id="pw-err">Incorrect password.</p>
+    <p class="login-hint">Default pw: <code>qcs2025</code></p>
+  </div>
+</div>
+
+<!-- ========== ADMIN PANEL ========== -->
+<div class="admin-bg" id="admin-panel">
+  <div class="admin-shell">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <div class="adm-logo"><div class="adm-logo-main">QCS Admin</div><div class="adm-logo-sub">Control Panel</div></div>
+      <nav class="adm-nav">
+        <a class="on" onclick="adPage('ov',this)"><span class="adm-nav-icon">OV</span>Overview</a>
+        <a onclick="adPage('inf',this)"><span class="adm-nav-icon">IN</span>Seminar Info</a>
+        <a onclick="adPage('mem',this)"><span class="adm-nav-icon">MB</span>Members</a>
+        <a onclick="adPage('sch',this)"><span class="adm-nav-icon">SC</span>Schedule</a>
+        <a onclick="adPage('mat',this)"><span class="adm-nav-icon">RS</span>Materials</a>
+        <a onclick="adPage('cfg',this)"><span class="adm-nav-icon">CF</span>Settings</a>
+      </nav>
+      <div class="adm-footer">
+        <button class="adm-exit" onclick="closeAdmin()">&#8592; Back to Site</button>
+      </div>
+    </aside>
+    <!-- MAIN -->
+    <main class="adm-main">
+
+      <!-- OVERVIEW -->
+      <div class="adm-page on" id="ap-ov">
+        <div class="adm-page-head"><div class="adm-page-title">Overview</div><button class="btn btn-ac btn-sm" onclick="saveAll()">Save &amp; Publish</button></div>
+        <div class="adm-stats">
+          <div class="adm-stat"><span class="adm-stat-n" id="a-nm">0</span><span class="adm-stat-l">Members</span></div>
+          <div class="adm-stat"><span class="adm-stat-n" id="a-ns">0</span><span class="adm-stat-l">Sessions</span></div>
+          <div class="adm-stat"><span class="adm-stat-n" id="a-nr">0</span><span class="adm-stat-l">Materials</span></div>
+        </div>
+        <div class="adm-card">
+          <h3>Quick Actions</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:.6rem;">
+            <button class="btn btn-ghost btn-sm" onclick="adPage('mem',document.querySelector('.adm-nav a:nth-child(3)'))">+ Member</button>
+            <button class="btn btn-ghost btn-sm" onclick="adPage('sch',document.querySelector('.adm-nav a:nth-child(4)'))">+ Session</button>
+            <button class="btn btn-ghost btn-sm" onclick="adPage('mat',document.querySelector('.adm-nav a:nth-child(5)'))">+ Material</button>
+            <button class="btn btn-ghost btn-sm" onclick="adPage('inf',document.querySelector('.adm-nav a:nth-child(2)'))">Edit Info</button>
+          </div>
+        </div>
+        <div class="adm-card"><h3>Recent Members</h3><table class="tbl"><thead><tr><th>Name</th><th>Affiliation</th><th>Role</th></tr></thead><tbody id="ov-mt"></tbody></table></div>
+      </div>
+
+      <!-- INFO -->
+      <div class="adm-page" id="ap-inf">
+        <div class="adm-page-head"><div class="adm-page-title">Seminar Info</div><button class="btn btn-ac btn-sm" onclick="saveAll()">Save &amp; Publish</button></div>
+        <div class="adm-card">
+          <h3>Basic Details</h3>
+          <div class="fr"><div class="fg"><label>Location</label><input id="i-loc" type="text" placeholder="세미나실 403호"></div><div class="fg"><label>Meeting Time</label><input id="i-time" type="text" placeholder="매주 목요일 15:00–17:00"></div></div>
+          <div class="fr"><div class="fg"><label>Online Link (Zoom / Teams)</label><input id="i-link" type="text" placeholder="https://zoom.us/j/..."></div><div class="fg"><label>Focus (short)</label><input id="i-focus" type="text" placeholder="QA · QML · QKD · QEC"></div></div>
+          <div class="fg"><label>Focus Subtitle</label><input id="i-fsub" type="text" placeholder="Algorithms · ML · Cryptography · Error Correction"></div>
+          <div class="fg"><label>Hero Description</label><textarea id="i-desc" rows="3"></textarea></div>
+        </div>
+        <div class="adm-card">
+          <h3>Topic Chips</h3>
+          <div class="chips-edit" id="chips-ed"></div>
+          <div style="display:flex;gap:.6rem;align-items:center;">
+            <input type="text" id="chip-in" placeholder="Add topic..." style="flex:1;background:var(--bg);border:1px solid var(--br);color:var(--tx);padding:.52rem .75rem;font-family:'DM Sans',sans-serif;font-size:.84rem;outline:none;" onkeydown="if(event.key==='Enter')addChip()">
+            <button class="btn btn-ghost btn-sm" onclick="addChip()">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMBERS -->
+      <div class="adm-page" id="ap-mem">
+        <div class="adm-page-head"><div class="adm-page-title">Members</div><button class="btn btn-ac btn-sm" onclick="saveAll()">Save &amp; Publish</button></div>
+        <div class="adm-card">
+          <h3>Add Member</h3>
+          <div class="fr"><div class="fg"><label>Name *</label><input id="m-n" type="text" placeholder="이름"></div><div class="fg"><label>Affiliation</label><input id="m-a" type="text" placeholder="Lab / Dept."></div></div>
+          <div class="fr"><div class="fg"><label>Role</label><select id="m-r"><option value="member">Member</option><option value="presenter">Presenter</option><option value="organizer">Organizer</option></select></div><div class="fg"><label>Email</label><input id="m-e" type="email" placeholder="optional"></div></div>
+          <button class="btn btn-ac btn-sm" onclick="addMember()">Add Member</button>
+        </div>
+        <div class="adm-card"><h3>Member List</h3><table class="tbl"><thead><tr><th>#</th><th>Name</th><th>Affil.</th><th>Role</th><th>Actions</th></tr></thead><tbody id="mem-tb"></tbody></table></div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div class="adm-page" id="ap-sch">
+        <div class="adm-page-head"><div class="adm-page-title">Schedule</div><button class="btn btn-ac btn-sm" onclick="saveAll()">Save &amp; Publish</button></div>
+        <div class="adm-card">
+          <h3>Add Session</h3>
+          <div class="fr"><div class="fg"><label>Week / Label *</label><input id="s-w" type="text" placeholder="e.g. Week 3"></div><div class="fg"><label>Date &amp; Time</label><input id="s-dt" type="datetime-local"></div></div>
+          <div class="fg"><label>Topic / Title *</label><input id="s-ti" type="text" placeholder="e.g. Shor's Algorithm Deep Dive"></div>
+          <div class="fg" style="margin-bottom:.4rem;"><label>Presenters (여러 명 가능)</label></div>
+          <div class="presenter-inputs" id="pi-list"><div class="pi-row"><input type="text" placeholder="발표자 이름 1"><button class="pi-rm" onclick="removePiRow(this)" title="Remove">&#215;</button></div></div>
+          <button class="btn btn-ghost btn-sm" onclick="addPiRow()" style="margin-bottom:.9rem;">+ Add Presenter</button>
+          <div class="fg"><label>Description</label><textarea id="s-de" rows="2" placeholder="세션 설명 (선택)"></textarea></div>
+          <button class="btn btn-ac btn-sm" onclick="addSession()">Add Session</button>
+        </div>
+        <div class="adm-card"><h3>Session List</h3><table class="tbl"><thead><tr><th>Week</th><th>Title</th><th>Date</th><th>Presenters</th><th>Actions</th></tr></thead><tbody id="sch-tb"></tbody></table></div>
+      </div>
+
+      <!-- MATERIALS -->
+      <div class="adm-page" id="ap-mat">
+        <div class="adm-page-head"><div class="adm-page-title">Materials</div><button class="btn btn-ac btn-sm" onclick="saveAll()">Save &amp; Publish</button></div>
+        <div class="adm-card">
+          <h3>Upload Material</h3>
+          <!-- DROP ZONE -->
+          <div class="drop-zone" id="dz" onclick="document.getElementById('file-in').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)">
+            <div class="dz-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div>
+            <p class="dz-text">Drag &amp; drop file here, or click to browse</p>
+            <p class="dz-hint">PDF &middot; PPTX &middot; MP4 &middot; MP3 &middot; ZIP &middot; Any file</p>
+            <p class="dz-hint" id="dz-fname" style="color:var(--ac3);margin-top:.4rem;"></p>
+          </div>
+          <input type="file" id="file-in" class="dz-input" onchange="handleFile(this.files[0])">
+          <div class="fr"><div class="fg"><label>Title *</label><input id="r-ti" type="text" placeholder="e.g. Week 3 – QML Slides"></div><div class="fg"><label>Session / Week</label><input id="r-wk" type="text" placeholder="e.g. Week 3"></div></div>
+          <div class="fr3">
+            <div class="fg"><label>Type</label><select id="r-ty"><option value="slides">Slides</option><option value="paper">Paper</option><option value="notes">Notes</option><option value="code">Code</option><option value="audio">Audio</option><option value="video">Video</option><option value="other">Other</option></select></div>
+            <div class="fg"><label>Presenters</label><input id="r-au" type="text" placeholder="이름 (쉼표 구분)"></div>
+            <div class="fg"><label>External URL (optional)</label><input id="r-url" type="text" placeholder="https://drive.google.com/..."></div>
+          </div>
+          <button class="btn btn-ac btn-sm" onclick="uploadMat()">Upload</button>
+        </div>
+        <div class="adm-card"><h3>Materials List</h3><table class="tbl"><thead><tr><th>Week</th><th>Title</th><th>Type</th><th>Presenters</th><th>Date</th><th>Actions</th></tr></thead><tbody id="mat-tb"></tbody></table></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="adm-page" id="ap-cfg">
+        <div class="adm-page-head"><div class="adm-page-title">Settings</div></div>
+        <div class="adm-card">
+          <h3>Change Password</h3>
+          <div class="fr"><div class="fg"><label>Current Password</label><input type="password" id="pw-cur" placeholder="Current"></div><div class="fg"><label>New Password</label><input type="password" id="pw-nw" placeholder="New (min 4 chars)"></div></div>
+          <button class="btn btn-ac btn-sm" onclick="changePw()">Change</button>
+          <p id="pw-msg" style="font-size:.78rem;margin-top:.55rem;font-family:'Space Mono',monospace;"></p>
+        </div>
+        <div class="adm-card">
+          <h3>Data Management</h3>
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="exportJSON()">Export JSON</button>
+            <button class="btn btn-ghost btn-sm" onclick="importJSON()">Import JSON</button>
+            <button class="btn btn-del btn-sm" onclick="resetAll()">Reset to Default</button>
+          </div>
+        </div>
+        <div class="adm-card">
+          <h3>How to share this page</h3>
+          <p style="font-size:.84rem;color:var(--tx2);line-height:1.75;">
+            This is a single HTML file. To share it with your team:<br>
+            <strong style="color:var(--ac);">1. Netlify Drop</strong> — Go to <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--ac3);">app.netlify.com/drop</a> and drag this file. Get a free URL instantly.<br>
+            <strong style="color:var(--ac);">2. GitHub Pages</strong> — Push to a repo, enable Pages, get <code style="color:var(--ac2);">username.github.io/qcs</code><br>
+            <strong style="color:var(--ac);">3. Google Drive</strong> — Share via drive link (view only for others).<br>
+            <span style="color:var(--tx3);font-size:.76rem;">Custom domain (e.g. quantumcomputingseminar.com) requires domain purchase (~$10/yr) + Netlify free hosting.</span>
+          </p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- EDIT MODAL (members/sessions/materials) -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal">
+    <div class="modal-head"><span class="modal-title" id="em-title">Edit</span><button class="modal-close" onclick="closeEditModal()">&#215;</button></div>
+    <div class="modal-body" id="em-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════
+const DFLT = {
+  info:{loc:'세미나실 403호',time:'매주 목요일 15:00–17:00',link:'',focus:'QA · QML · QKD · QEC',fsub:'Algorithms · ML · Cryptography · Error Correction',desc:'A graduate research seminar exploring the theoretical and applied frontiers of quantum information science — from quantum algorithms and cryptography to quantum machine learning and error correction.',chips:['Quantum Algorithms','Quantum Cryptography','Quantum Machine Learning','Error Correction','Quantum Information Theory','Quantum Hardware']},
+  members:[{id:1,name:'김지원',affil:'CS Dept.',role:'organizer',email:''},{id:2,name:'이하준',affil:'Physics Dept.',role:'presenter',email:''},{id:3,name:'박서연',affil:'EE Dept.',role:'member',email:''}],
+  sessions:[{id:1,week:'Week 1',datetime:'2025-03-06T15:00',title:'Introduction to Quantum Computing',presenters:['김지원','이하준'],desc:'Overview of qubits, superposition, and quantum gates.'},{id:2,week:'Week 2',datetime:'2025-03-13T15:00',title:"Grover's Search Algorithm",presenters:['이하준'],desc:'Quadratic speedup for unstructured search problems.'}],
+  materials:[{id:1,title:'Intro Slides – Quantum Basics',week:'Week 1',type:'slides',presenters:['김지원'],fileData:null,fileName:null,url:'#',date:'2025-03-06'},{id:2,title:"Grover's Algorithm – Paper Review",week:'Week 2',type:'paper',presenters:['이하준'],fileData:null,fileName:null,url:'#',date:'2025-03-13'}]
+};
+let NID = 50;
+let S;
+function loadS(){try{const r=localStorage.getItem('qcs_v2');return r?JSON.parse(r):JSON.parse(JSON.stringify(DFLT));}catch{return JSON.parse(JSON.stringify(DFLT));}}
+function saveS(){localStorage.setItem('qcs_v2',JSON.stringify(S));}
+
+// ════════════════════════════════════════════
+// PARTICLES
+// ════════════════════════════════════════════
+(()=>{const cv=document.getElementById('cvs'),cx=cv.getContext('2d');let pts=[];function rsz(){cv.width=innerWidth;cv.height=innerHeight;}function ip(){pts=[];for(let i=0;i<55;i++)pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.4+.3,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,o:Math.random()*.32+.08});}function draw(){cx.clearRect(0,0,cv.width,cv.height);pts.forEach(p=>{cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(56,189,248,${p.o})`;cx.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=cv.width;if(p.x>cv.width)p.x=0;if(p.y<0)p.y=cv.height;if(p.y>cv.height)p.y=0;});for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<110){cx.beginPath();cx.strokeStyle=`rgba(56,189,248,${.05*(1-d/110)})`;cx.lineWidth=.5;cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);cx.stroke();}}requestAnimationFrame(draw);}rsz();ip();draw();window.addEventListener('resize',()=>{rsz();ip();});})();
+
+// ════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════
+function scrollTo(sel){document.querySelector(sel)?.scrollIntoView({behavior:'smooth'});}
+function toast(msg,ok=true){const t=document.getElementById('toast');t.textContent=(ok?'✓ ':'✕ ')+msg;t.style.borderColor=ok?'var(--ac)':'var(--danger)';t.style.color=ok?'var(--ac)':'var(--danger)';t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2600);}
+function ini(name){if(!name)return'??';const p=name.trim().split(/\s+/);return p.length===1?name.slice(0,2).toUpperCase():(p[0][0]+p[p.length-1][0]).toUpperCase();}
+function fmtDT(dt){if(!dt)return'—';try{const d=new Date(dt);return d.toLocaleDateString('ko-KR',{month:'short',day:'numeric',weekday:'short'})+' '+d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});}catch{return dt;}}
+function fmtBytes(n){if(!n)return'';if(n<1024)return n+'B';if(n<1048576)return(n/1024).toFixed(1)+'KB';return(n/1048576).toFixed(1)+'MB';}
+
+// ════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════
+const PW_KEY='qcs_pw';
+function getPW(){return localStorage.getItem(PW_KEY)||'qcs2025';}
+function openAdminLogin(){document.getElementById('login-modal').classList.add('open');setTimeout(()=>document.getElementById('pw-in').focus(),100);}
+function doLogin(){
+  const v=document.getElementById('pw-in').value;
+  if(v===getPW()){
+    document.getElementById('login-modal').classList.remove('open');
+    document.getElementById('pw-in').value='';
+    document.getElementById('pw-err').style.display='none';
+    openAdmin();
+  }else{document.getElementById('pw-err').style.display='block';}
+}
+document.getElementById('login-modal').addEventListener('click',e=>{if(e.target===document.getElementById('login-modal'))document.getElementById('login-modal').classList.remove('open');});
+function changePw(){
+  const cur=document.getElementById('pw-cur').value,nw=document.getElementById('pw-nw').value,msg=document.getElementById('pw-msg');
+  if(cur!==getPW()){msg.textContent='Current password incorrect.';msg.style.color='var(--danger)';return;}
+  if(nw.length<4){msg.textContent='Min 4 characters.';msg.style.color='var(--danger)';return;}
+  localStorage.setItem(PW_KEY,nw);msg.textContent='Password changed.';msg.style.color='var(--ac3)';
+  document.getElementById('pw-cur').value='';document.getElementById('pw-nw').value='';
+}
+
+// ════════════════════════════════════════════
+// ADMIN PANEL
+// ════════════════════════════════════════════
+function openAdmin(){
+  document.getElementById('admin-panel').classList.add('open');
+  populateAdmin();updateOv();
+}
+function closeAdmin(){document.getElementById('admin-panel').classList.remove('open');}
+function adPage(id,el){
+  document.querySelectorAll('.adm-page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('ap-'+id).classList.add('on');
+  document.querySelectorAll('.adm-nav a').forEach(a=>a.classList.remove('on'));
+  if(el)el.classList.add('on');
+}
+function populateAdmin(){
+  const i=S.info;
+  document.getElementById('i-loc').value=i.loc||'';
+  document.getElementById('i-time').value=i.time||'';
+  document.getElementById('i-link').value=i.link||'';
+  document.getElementById('i-focus').value=i.focus||'';
+  document.getElementById('i-fsub').value=i.fsub||'';
+  document.getElementById('i-desc').value=i.desc||'';
+  renderChips();renderMemTb();renderSchTb();renderMatTb();
+}
+function updateOv(){
+  document.getElementById('a-nm').textContent=S.members.length;
+  document.getElementById('a-ns').textContent=S.sessions.length;
+  document.getElementById('a-nr').textContent=S.materials.length;
+  document.getElementById('ov-mt').innerHTML=S.members.slice(0,5).map(m=>`<tr><td style="color:var(--tx)">${m.name}</td><td>${m.affil||'—'}</td><td><span class="role-badge rb-${m.role}">${m.role}</span></td></tr>`).join('')||'<tr><td colspan="3" class="empty">No members.</td></tr>';
+}
+
+// ════════════════════════════════════════════
+// SAVE ALL
+// ════════════════════════════════════════════
+function saveAll(){
+  S.info={
+    loc:document.getElementById('i-loc').value||S.info.loc,
+    time:document.getElementById('i-time').value||S.info.time,
+    link:document.getElementById('i-link').value,
+    focus:document.getElementById('i-focus').value||S.info.focus,
+    fsub:document.getElementById('i-fsub').value||S.info.fsub,
+    desc:document.getElementById('i-desc').value||S.info.desc,
+    chips:S.info.chips||DFLT.info.chips
+  };
+  saveS();renderPublic();updateOv();toast('Saved & published!');
+}
+
+// ════════════════════════════════════════════
+// CHIPS
+// ════════════════════════════════════════════
+function renderChips(){
+  document.getElementById('chips-ed').innerHTML=(S.info.chips||[]).map((c,i)=>`<div class="chip-e">${c}<button class="chip-x" onclick="rmChip(${i})">&#215;</button></div>`).join('');
+}
+function addChip(){const v=document.getElementById('chip-in').value.trim();if(!v)return;S.info.chips=(S.info.chips||[]);S.info.chips.push(v);document.getElementById('chip-in').value='';renderChips();}
+function rmChip(i){S.info.chips.splice(i,1);renderChips();}
+
+// ════════════════════════════════════════════
+// MEMBERS
+// ════════════════════════════════════════════
+function addMember(){
+  const n=document.getElementById('m-n').value.trim();
+  if(!n){toast('Name required.',false);return;}
+  S.members.push({id:NID++,name:n,affil:document.getElementById('m-a').value.trim(),role:document.getElementById('m-r').value,email:document.getElementById('m-e').value.trim()});
+  ['m-n','m-a','m-e'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-r').value='member';
+  renderMemTb();updateOv();toast('Member added!');
+}
+function rmMember(id){if(!confirm('Remove this member?'))return;S.members=S.members.filter(m=>m.id!==id);renderMemTb();updateOv();}
+function editMember(id){
+  const m=S.members.find(x=>x.id===id);if(!m)return;
+  document.getElementById('em-title').textContent='Edit Member';
+  document.getElementById('em-body').innerHTML=`
+    <div class="fg"><label>Name</label><input class="inline-edit" id="em-n" value="${m.name}"></div>
+    <div class="fg"><label>Affiliation</label><input class="inline-edit" id="em-a" value="${m.affil||''}"></div>
+    <div class="fg"><label>Role</label><select class="inline-edit" id="em-r"><option value="member" ${m.role==='member'?'selected':''}>Member</option><option value="presenter" ${m.role==='presenter'?'selected':''}>Presenter</option><option value="organizer" ${m.role==='organizer'?'selected':''}>Organizer</option></select></div>
+    <div class="fg"><label>Email</label><input class="inline-edit" id="em-e" value="${m.email||''}"></div>
+    <button class="btn btn-ac btn-sm" style="margin-top:.5rem" onclick="saveMember(${id})">Save</button>
+  `;
+  openEditModal();
+}
+function saveMember(id){
+  const m=S.members.find(x=>x.id===id);if(!m)return;
+  m.name=document.getElementById('em-n').value.trim()||m.name;
+  m.affil=document.getElementById('em-a').value.trim();
+  m.role=document.getElementById('em-r').value;
+  m.email=document.getElementById('em-e').value.trim();
+  closeEditModal();renderMemTb();updateOv();toast('Member updated!');
+}
+function renderMemTb(){
+  document.getElementById('mem-tb').innerHTML=S.members.map((m,i)=>`
+    <tr>
+      <td style="color:var(--tx3);font-family:'Space Mono',monospace;">${i+1}</td>
+      <td style="color:var(--tx);font-weight:500;">${m.name}</td>
+      <td>${m.affil||'—'}</td>
+      <td><span class="role-badge rb-${m.role}">${m.role}</span></td>
+      <td><div class="tbl-actions"><button class="btn-edit" onclick="editMember(${m.id})">Edit</button><button class="btn-del" onclick="rmMember(${m.id})">Remove</button></div></td>
+    </tr>
+  `).join('')||'<tr><td colspan="5" class="empty">No members yet.</td></tr>';
+}
+
+// ════════════════════════════════════════════
+// PRESENTER INPUTS
+// ════════════════════════════════════════════
+function addPiRow(){
+  const d=document.createElement('div');d.className='pi-row';
+  d.innerHTML=`<input type="text" placeholder="발표자 이름"><button class="pi-rm" onclick="removePiRow(this)" title="Remove">&#215;</button>`;
+  document.getElementById('pi-list').appendChild(d);
+}
+function removePiRow(btn){const p=btn.parentElement;if(document.querySelectorAll('#pi-list .pi-row').length>1)p.remove();}
+function getPresenters(){return [...document.querySelectorAll('#pi-list .pi-row input')].map(i=>i.value.trim()).filter(Boolean);}
+function setPresenters(arr){
+  const c=document.getElementById('pi-list');c.innerHTML='';
+  (arr&&arr.length?arr:[''].map(x=>'')).forEach(v=>{const d=document.createElement('div');d.className='pi-row';d.innerHTML=`<input type="text" value="${v}" placeholder="발표자 이름"><button class="pi-rm" onclick="removePiRow(this)" title="Remove">&#215;</button>`;c.appendChild(d);});
+}
+
+// ════════════════════════════════════════════
+// SESSIONS
+// ════════════════════════════════════════════
+function addSession(){
+  const ti=document.getElementById('s-ti').value.trim();if(!ti){toast('Title required.',false);return;}
+  const ps=getPresenters();
+  S.sessions.push({id:NID++,week:document.getElementById('s-w').value||`Session ${S.sessions.length+1}`,datetime:document.getElementById('s-dt').value,title:ti,presenters:ps,desc:document.getElementById('s-de').value.trim()});
+  ['s-w','s-dt','s-ti','s-de'].forEach(id=>document.getElementById(id).value='');
+  setPresenters(['']);renderSchTb();updateOv();toast('Session added!');
+}
+function rmSession(id){if(!confirm('Remove session?'))return;S.sessions=S.sessions.filter(s=>s.id!==id);renderSchTb();updateOv();}
+function editSession(id){
+  const s=S.sessions.find(x=>x.id===id);if(!s)return;
+  document.getElementById('em-title').textContent='Edit Session';
+  document.getElementById('em-body').innerHTML=`
+    <div class="fg"><label>Week / Label</label><input class="inline-edit" id="es-w" value="${s.week}"></div>
+    <div class="fg"><label>Date &amp; Time</label><input class="inline-edit" type="datetime-local" id="es-dt" value="${s.datetime||''}"></div>
+    <div class="fg"><label>Title</label><input class="inline-edit" id="es-ti" value="${s.title}"></div>
+    <div class="fg"><label>Presenters</label>
+      <div class="presenter-inputs" id="es-pi">${(s.presenters||['']).map(p=>`<div class="pi-row"><input type="text" value="${p}" placeholder="발표자"><button class="pi-rm" onclick="removePiRow(this)">&#215;</button></div>`).join('')}</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:.35rem" onclick="addEsPiRow()">+ Add</button>
+    </div>
+    <div class="fg"><label>Description</label><textarea class="inline-edit" id="es-de" rows="3" style="resize:vertical;">${s.desc||''}</textarea></div>
+    <button class="btn btn-ac btn-sm" style="margin-top:.5rem" onclick="saveSession(${id})">Save</button>
+  `;
+  openEditModal();
+}
+function addEsPiRow(){const c=document.getElementById('es-pi');const d=document.createElement('div');d.className='pi-row';d.innerHTML=`<input type="text" placeholder="발표자"><button class="pi-rm" onclick="removePiRow(this)">&#215;</button>`;c.appendChild(d);}
+function saveSession(id){
+  const s=S.sessions.find(x=>x.id===id);if(!s)return;
+  s.week=document.getElementById('es-w').value.trim()||s.week;
+  s.datetime=document.getElementById('es-dt').value;
+  s.title=document.getElementById('es-ti').value.trim()||s.title;
+  s.presenters=[...document.querySelectorAll('#es-pi .pi-row input')].map(i=>i.value.trim()).filter(Boolean);
+  s.desc=document.getElementById('es-de').value.trim();
+  closeEditModal();renderSchTb();toast('Session updated!');
+}
+function renderSchTb(){
+  document.getElementById('sch-tb').innerHTML=S.sessions.map(s=>`
+    <tr>
+      <td style="font-family:'Space Mono',monospace;color:var(--ac);font-size:.76rem;">${s.week}</td>
+      <td style="color:var(--tx);">${s.title}</td>
+      <td style="font-size:.78rem;">${fmtDT(s.datetime)}</td>
+      <td style="font-size:.78rem;">${(s.presenters||[]).join(', ')||'—'}</td>
+      <td><div class="tbl-actions"><button class="btn-edit" onclick="editSession(${s.id})">Edit</button><button class="btn-del" onclick="rmSession(${s.id})">Remove</button></div></td>
+    </tr>
+  `).join('')||'<tr><td colspan="5" class="empty">No sessions.</td></tr>';
+}
+
+// ════════════════════════════════════════════
+// FILE UPLOAD
+// ════════════════════════════════════════════
+let pendingFile=null;
+function dzOver(e){e.preventDefault();document.getElementById('dz').classList.add('drag-over');}
+function dzLeave(e){document.getElementById('dz').classList.remove('drag-over');}
+function dzDrop(e){e.preventDefault();dzLeave();if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);}
+function handleFile(f){
+  if(!f)return;
+  pendingFile={name:f.name,size:f.size,type:f.type};
+  // Read as base64 for storage/preview
+  const rdr=new FileReader();
+  rdr.onload=ev=>{
+    pendingFile.data=ev.target.result;
+    document.getElementById('dz-fname').textContent=`${f.name} (${fmtBytes(f.size)})`;
+    // Auto-fill title if empty
+    if(!document.getElementById('r-ti').value){document.getElementById('r-ti').value=f.name.replace(/\.[^/.]+$/,'');}
+    // Auto-detect type
+    const ext=f.name.split('.').pop().toLowerCase();
+    const tyMap={pdf:'paper',pptx:'slides',ppt:'slides',key:'slides',mp4:'video',mov:'video',avi:'video',mp3:'audio',m4a:'audio',wav:'audio',zip:'other',ipynb:'code',py:'code',js:'code'};
+    if(tyMap[ext])document.getElementById('r-ty').value=tyMap[ext];
+  };
+  if(f.size<10*1024*1024){rdr.readAsDataURL(f);}// <10MB store as base64
+  else{pendingFile.data=null;pendingFile.tooLarge=true;document.getElementById('dz-fname').textContent=`${f.name} (${fmtBytes(f.size)}) — too large to embed, use URL field`;}
+}
+
+// ════════════════════════════════════════════
+// MATERIALS
+// ════════════════════════════════════════════
+function uploadMat(){
+  const ti=document.getElementById('r-ti').value.trim();if(!ti){toast('Title required.',false);return;}
+  const au=document.getElementById('r-au').value.trim();
+  const url=document.getElementById('r-url').value.trim();
+  const m={
+    id:NID++,title:ti,
+    week:document.getElementById('r-wk').value.trim()||'Misc',
+    type:document.getElementById('r-ty').value,
+    presenters:au?au.split(',').map(s=>s.trim()).filter(Boolean):[],
+    fileData:pendingFile?.data||null,
+    fileName:pendingFile?.name||null,
+    fileSize:pendingFile?.size||null,
+    url:url||(pendingFile?.data?null:'#'),
+    date:new Date().toISOString().slice(0,10)
+  };
+  S.materials.push(m);
+  pendingFile=null;
+  document.getElementById('dz-fname').textContent='';
+  ['r-ti','r-wk','r-au','r-url'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('file-in').value='';
+  renderMatTb();updateOv();toast('Material uploaded!');
+}
+function rmMat(id){if(!confirm('Remove material?'))return;S.materials=S.materials.filter(m=>m.id!==id);renderMatTb();updateOv();}
+function editMat(id){
+  const m=S.materials.find(x=>x.id===id);if(!m)return;
+  document.getElementById('em-title').textContent='Edit Material';
+  document.getElementById('em-body').innerHTML=`
+    <div class="fg"><label>Title</label><input class="inline-edit" id="em-ti" value="${m.title}"></div>
+    <div class="fg"><label>Week / Session</label><input class="inline-edit" id="em-wk" value="${m.week}"></div>
+    <div class="fr">
+      <div class="fg"><label>Type</label><select class="inline-edit" id="em-ty"><option value="slides" ${m.type==='slides'?'selected':''}>Slides</option><option value="paper" ${m.type==='paper'?'selected':''}>Paper</option><option value="notes" ${m.type==='notes'?'selected':''}>Notes</option><option value="code" ${m.type==='code'?'selected':''}>Code</option><option value="audio" ${m.type==='audio'?'selected':''}>Audio</option><option value="video" ${m.type==='video'?'selected':''}>Video</option><option value="other" ${m.type==='other'?'selected':''}>Other</option></select></div>
+      <div class="fg"><label>Presenters (쉼표 구분)</label><input class="inline-edit" id="em-au" value="${(m.presenters||[]).join(', ')}"></div>
+    </div>
+    <div class="fg"><label>External URL</label><input class="inline-edit" id="em-url" value="${m.url||''}"></div>
+    ${m.fileName?`<p style="font-size:.76rem;color:var(--tx3);font-family:'Space Mono',monospace;margin-bottom:.5rem;">Attached: ${m.fileName} (${fmtBytes(m.fileSize)})</p>`:''}
+    <button class="btn btn-ac btn-sm" style="margin-top:.5rem" onclick="saveMat(${id})">Save</button>
+  `;
+  openEditModal();
+}
+function saveMat(id){
+  const m=S.materials.find(x=>x.id===id);if(!m)return;
+  m.title=document.getElementById('em-ti').value.trim()||m.title;
+  m.week=document.getElementById('em-wk').value.trim()||m.week;
+  m.type=document.getElementById('em-ty').value;
+  const au=document.getElementById('em-au').value.trim();
+  m.presenters=au?au.split(',').map(s=>s.trim()).filter(Boolean):[];
+  m.url=document.getElementById('em-url').value.trim();
+  closeEditModal();renderMatTb();toast('Material updated!');
+}
+function renderMatTb(){
+  document.getElementById('mat-tb').innerHTML=S.materials.map(m=>`
+    <tr>
+      <td style="font-family:'Space Mono',monospace;color:var(--ac);font-size:.74rem;">${m.week}</td>
+      <td style="color:var(--tx);">${m.title}</td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:.7rem;color:var(--tx3);">${m.type}</span></td>
+      <td style="font-size:.78rem;">${(m.presenters||[]).join(', ')||'—'}</td>
+      <td style="font-size:.76rem;color:var(--tx3);">${m.date}</td>
+      <td><div class="tbl-actions"><button class="btn-edit" onclick="editMat(${m.id})">Edit</button><button class="btn-del" onclick="rmMat(${m.id})">Remove</button></div></td>
+    </tr>
+  `).join('')||'<tr><td colspan="6" class="empty">No materials.</td></tr>';
+}
+
+// ════════════════════════════════════════════
+// EDIT MODAL
+// ════════════════════════════════════════════
+function openEditModal(){document.getElementById('edit-modal').classList.add('open');}
+function closeEditModal(){document.getElementById('edit-modal').classList.remove('open');}
+document.getElementById('edit-modal').addEventListener('click',e=>{if(e.target===document.getElementById('edit-modal'))closeEditModal();});
+
+// ════════════════════════════════════════════
+// PUBLIC RENDER
+// ════════════════════════════════════════════
+let matFilter='all';
+function filterMat(w,btn){matFilter=w;document.querySelectorAll('.wbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderPubMat();}
+
+function renderPublic(){
+  const i=S.info;
+  // desc + chips
+  document.getElementById('p-desc').textContent=i.desc||DFLT.info.desc;
+  document.getElementById('p-chips').innerHTML=(i.chips||DFLT.info.chips).map(c=>`<span class="chip">${c}</span>`).join('');
+  // info cards
+  document.getElementById('p-loc').textContent=i.loc||DFLT.info.loc;
+  document.getElementById('p-time').textContent=i.time||DFLT.info.time;
+  if(i.link){document.getElementById('p-link-label').textContent='Online Meeting';document.getElementById('p-link-url').textContent=i.link;document.getElementById('p-link-url').onclick=()=>window.open(i.link,'_blank');}
+  else{document.getElementById('p-link-label').textContent='온라인 링크 미설정';document.getElementById('p-link-url').textContent='';}
+  document.getElementById('p-focus').textContent=i.focus||DFLT.info.focus;
+  document.getElementById('p-focus-sub').textContent=i.fsub||DFLT.info.fsub;
+  // stats
+  document.getElementById('s-members').textContent=S.members.length;
+  document.getElementById('s-sessions').textContent=S.sessions.length;
+  document.getElementById('s-materials').textContent=S.materials.length;
+  // members
+  const mg=document.getElementById('p-mem-grid');
+  mg.innerHTML=S.members.length?S.members.map(m=>`
+    <div class="mem-card">
+      <div class="avi avi-${m.role}">${ini(m.name)}</div>
+      <div class="mem-name">${m.name}</div>
+      <div class="mem-affil">${m.affil||'—'}</div>
+      <span class="role-badge rb-${m.role}">${m.role}</span>
+    </div>
+  `).join(''):'<div class="empty" style="grid-column:1/-1;">No members yet.</div>';
+  // sessions
+  const tl=document.getElementById('p-timeline');
+  tl.innerHTML=S.sessions.length?S.sessions.map(s=>`
+    <div class="sched-item">
+      <div class="sched-week">${s.week}</div>
+      <div class="sched-title">${s.title}</div>
+      <div class="sched-meta"><span>${fmtDT(s.datetime)}</span></div>
+      ${(s.presenters&&s.presenters.length)?`<div class="presenters-list">${s.presenters.map(p=>`<span class="presenter-tag">${p}</span>`).join('')}</div>`:''}
+      ${s.desc?`<p class="sched-desc" style="margin-top:.45rem;">${s.desc}</p>`:''}
+    </div>
+  `).join(''):'<div class="empty">No sessions scheduled.</div>';
+  // materials week filter
+  const weeks=[...new Set(S.materials.map(m=>m.week))].sort();
+  const wf=document.getElementById('p-wfilter');
+  wf.innerHTML=`<button class="wbtn ${matFilter==='all'?'on':''}" onclick="filterMat('all',this)">All</button>`+weeks.map(w=>`<button class="wbtn ${matFilter===w?'on':''}" onclick="filterMat('${w}',this)">${w}</button>`).join('');
+  renderPubMat();
+}
+
+function renderPubMat(){
+  const g=document.getElementById('p-mat-grid');
+  const mats=matFilter==='all'?S.materials:S.materials.filter(m=>m.week===matFilter);
+  if(!mats.length){g.innerHTML='<div class="empty" style="grid-column:1/-1;">No materials yet.</div>';return;}
+  g.innerHTML=mats.map(m=>{
+    const hasFile=!!m.fileData;
+    const isAudio=m.type==='audio';
+    const isVideo=m.type==='video';
+    const isImg=m.fileData&&m.fileData.startsWith('data:image');
+    let preview='';
+    if(isAudio&&hasFile)preview=`<audio controls style="width:100%;margin-top:.3rem;filter:invert(1) hue-rotate(180deg);" src="${m.fileData}"></audio>`;
+    else if(isVideo&&hasFile)preview=`<video controls style="width:100%;margin-top:.3rem;border:1px solid var(--br);max-height:160px;" src="${m.fileData}"></video>`;
+    else if(isImg)preview=`<img src="${m.fileData}" class="file-preview" style="max-height:100px;object-fit:cover;">`;
+    const dlHref=hasFile?m.fileData:(m.url&&m.url!=='#'?m.url:null);
+    return `
+    <div class="mat-card">
+      <div class="mat-top">
+        <div class="mat-type-box">${m.type.slice(0,3).toUpperCase()}</div>
+        <div class="mat-title">${m.title}</div>
+      </div>
+      <div class="mat-meta">${m.date}${m.fileName?` &middot; ${m.fileName}`:''}</div>
+      <span class="mat-week-tag">${m.week}</span>
+      ${(m.presenters&&m.presenters.length)?`<div class="mat-presenters">${m.presenters.join(', ')}</div>`:''}
+      ${preview}
+      ${dlHref?`<button class="mat-dl" onclick="dlMat(this,'${m.id}')">${hasFile?'Download':'View / Open'}</button>`:'<div class="mat-dl" style="cursor:default;opacity:.4;">No file attached</div>'}
+    </div>
+  `}).join('');
+}
+function dlMat(btn,id){
+  const m=S.materials.find(x=>x.id==id);if(!m)return;
+  if(m.fileData){const a=document.createElement('a');a.href=m.fileData;a.download=m.fileName||m.title;a.click();}
+  else if(m.url&&m.url!=='#'){window.open(m.url,'_blank');}
+}
+
+// ════════════════════════════════════════════
+// DATA MGMT
+// ════════════════════════════════════════════
+function exportJSON(){const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='qcs_data.json';a.click();}
+function importJSON(){const t=prompt('Paste exported JSON:');if(!t)return;try{S=JSON.parse(t);saveS();populateAdmin();renderPublic();updateOv();toast('Imported!');}catch{toast('Invalid JSON.',false);}}
+function resetAll(){if(!confirm('Reset ALL data?'))return;S=JSON.parse(JSON.stringify(DFLT));saveS();populateAdmin();renderPublic();updateOv();toast('Reset done.');}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+S=loadS();
+renderPublic();
+
+// storage sync (other tabs)
+window.addEventListener('storage',e=>{if(e.key==='qcs_v2'&&e.newValue){S=JSON.parse(e.newValue);renderPublic();}});
+</script>
+</body>
+</html>
